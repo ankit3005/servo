@@ -95,7 +95,7 @@ impl<Window> Browser<Window> where Window: WindowMethods + 'static {
 
         let opts_clone = opts.clone();
         let time_profiler_chan_clone = time_profiler_chan.clone();
-	//let time_profiler_chan1_clone = time_profiler_chan1.clone();
+         //let time_profiler_chan1_clone = time_profiler_chan1.clone();
         let (result_chan, result_port) = channel();
         let compositor_proxy_for_constellation = compositor_proxy.clone_compositor_proxy();
         TaskBuilder::new()
@@ -110,7 +110,7 @@ impl<Window> Browser<Window> where Window: WindowMethods + 'static {
             let image_cache_task = if opts.output_file.is_some() {
                 ImageCacheTask::new_sync(resource_task.clone(), shared_task_pool, time_profiler_chan)
             } else {
-		ImageCacheTask::new(resource_task.clone(), shared_task_pool, time_profiler_chan)
+                  ImageCacheTask::new(resource_task.clone(), shared_task_pool, time_profiler_chan)
             };
             let font_cache_task = FontCacheTask::new(resource_task.clone());
             let constellation_chan = Constellation::<layout::layout_task::LayoutTask,

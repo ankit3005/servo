@@ -16,7 +16,7 @@ use std::result;
 use sync::{Arc, Mutex};
 use serialize::{Encoder, Encodable};
 use url::Url;
-use time::precise_time_ns;
+//use time::precise_time_ns;
 use servo_util::time;
 use servo_util::time::{TimeProfilerChan, profile};
 
@@ -47,7 +47,6 @@ pub enum Msg {
 
     /// For testing
     WaitForStore(Sender<()>),
-
     /// For testing
     WaitForStorePrefetched(Sender<()>),
 }
@@ -65,7 +64,6 @@ impl PartialEq for ImageResponseMsg {
             (&ImageReady(..), &ImageReady(..)) => panic!("unimplemented comparison"),
             (&ImageNotReady, &ImageNotReady) => true,
             (&ImageFailed, &ImageFailed) => true,
-
             (&ImageReady(..), _) | (&ImageNotReady, _) | (&ImageFailed, _) => false
         }
     }
@@ -99,7 +97,6 @@ impl ImageCacheTask {
                 need_exit: None,
                 task_pool: task_pool,
 		time_profiler_chan: None,
-	
             };
             cache.run();
         });
@@ -114,7 +111,6 @@ impl ImageCacheTask {
 
         spawn_named("ImageCacheTask (sync)", proc() {
             let inner_cache = ImageCacheTask::new(resource_task, task_pool);
-
             loop {
                 let msg: Msg = port.recv();
 
@@ -126,8 +122,8 @@ impl ImageCacheTask {
                         inner_cache.send(Exit(response));
                         break;
                     }
-                    msg => inner_cache.send(msg)
-                }
+                    msg => inner_cache.send(msg) 
+                  }
             }
         });
 
@@ -316,8 +312,7 @@ impl ImageCache {
             Prefetched(data) => {
                 let to_cache = self.chan.clone();
                 let url_clone = url.clone();
-		let time_profiler_chan_clone = ((*self).time_profiler_chan).unwrap().clone();
-
+		let time_profiler_chan_clone =          ((*self).time_profiler_chan).as_ref().unwrap().clone();
                 self.task_pool.execute(proc() {
                     let url = url_clone;
                     debug!("image_cache_task: started image decode for {:s}", url.serialize());
@@ -326,18 +321,14 @@ impl ImageCache {
                 for x in s.as_slice().split('.') { ext=x; }
                 println!("{}",ext);
 	
-		time::profile(time::ImageDecodingCategory, None, time_profiler_chan_clone, || {
-                    let image = load_from_memory(data.as_slice(),ext);
-		});		
-
-                    let image = image.map(|image| Arc::new(box image));
-                    to_cache.send(StoreImage(url.clone(), image));
-                    debug!("image_cache_task: ended image decode for {:s}", 				url.serialize());
-                });
-
+		let image = time::profile(time::ImageDecodingCategory, None, time_profiler_chan_clone, || {
+                   load_from_memory(data.as_slice(),ext)
+                      });		
+                    //let image = image.map(|image| Arc::new(box image));
+                    //to_cache.send(StoreImage(url.clone(), image));
+                    debug!("image_cache_task: ended image decode for {:s}", url.serialize()); });
                 self.set_state(url, Decoding);
             }
-
             Decoding | Decoded(..) | Failed => {
                 // We've already begun decoding
             }

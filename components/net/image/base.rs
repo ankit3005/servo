@@ -48,19 +48,18 @@ pub fn load_from_memory(buffer: &[u8],ext: &str) -> Option<DynamicImage> {
         return None;
     }
    else {
-	
 	let result = servo_image::load_from_memory(buffer,get_format(ext));
-	if (result.is_ok()) {
+        if (result.is_ok()) {
   	    let v = result.unwrap();
-  	    return Some(v);
+            return Some(v);
 	}
-	else  {	
-	    return None;
-	}		
+          else  {
+             return None;
+          }		
    }
    }
 fn get_format(ext: &str) -> servo_image::ImageFormat {
-		match ext.to_ascii().to_uppercase().as_str_ascii() {
+           match ext.to_ascii().to_uppercase().as_str_ascii() {
     "PNG" => {return servo_image::ImageFormat::PNG;},
     "JPEG" => {return servo_image::ImageFormat::JPEG;},
     "JPG" => {return servo_image::ImageFormat::JPEG;},
