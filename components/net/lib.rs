@@ -20,6 +20,7 @@ extern crate sync;
 extern crate time;
 extern crate url;
 extern crate "image" as servo_image;
+extern crate util;
 
 /// Image handling.
 ///

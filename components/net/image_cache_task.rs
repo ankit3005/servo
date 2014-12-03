@@ -16,6 +16,10 @@ use std::result;
 use sync::{Arc, Mutex};
 use serialize::{Encoder, Encodable};
 use url::Url;
+use time::precise_time_ns;
+use servo_util::time;
+use servo_util::time::{TimeProfilerChan, profile};
+
 
 pub enum Msg {
     /// Tell the cache that we may need a particular image soon. Must be posted
@@ -94,6 +98,8 @@ impl ImageCacheTask {
                 wait_map: HashMap::new(),
                 need_exit: None,
                 task_pool: task_pool,
+		time_profiler_chan: None,
+	
             };
             cache.run();
         });
@@ -144,6 +150,7 @@ struct ImageCache {
     wait_map: HashMap<Url, Arc<Mutex<Vec<Sender<ImageResponseMsg>>>>>,
     need_exit: Option<Sender<()>>,
     task_pool: TaskPool,
+    time_profiler_chan: Option<TimeProfilerChan>,
 }
 
 #[deriving(Clone)]
@@ -309,6 +316,7 @@ impl ImageCache {
             Prefetched(data) => {
                 let to_cache = self.chan.clone();
                 let url_clone = url.clone();
+		let time_profiler_chan_clone = ((*self).time_profiler_chan).unwrap().clone();
 
                 self.task_pool.execute(proc() {
                     let url = url_clone;
@@ -318,10 +326,13 @@ impl ImageCache {
                 for x in s.as_slice().split('.') { ext=x; }
                 println!("{}",ext);
 	
+		time::profile(time::ImageDecodingCategory, None, time_profiler_chan_clone, || {
                     let image = load_from_memory(data.as_slice(),ext);
+		});		
+
                     let image = image.map(|image| Arc::new(box image));
                     to_cache.send(StoreImage(url.clone(), image));
-                    debug!("image_cache_task: ended image decode for {:s}", url.serialize());
+                    debug!("image_cache_task: ended image decode for {:s}", 				url.serialize());
                 });
 
                 self.set_state(url, Decoding);
@@ -985,8 +996,8 @@ mod tests {
     #[test]
     fn sync_cache_should_wait_for_images() {
         let mock_resource_task = mock_resource_task(box SendTestImage);
-       
-        let image_cache_task = ImageCacheTask::new_sync(mock_resource_task.clone(), TaskPool::new(4));
+
+        let image_cache_task = ImageCacheTask::new_sync(mock_resource_task.clone(), TaskPool::new(4), time_profiler_chan);
         let url = Url::parse("file:///").unwrap();
 
         image_cache_task.send(Prefetch(url.clone()));

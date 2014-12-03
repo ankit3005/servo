@@ -231,7 +231,6 @@ dependencies = [
  "freetype-rs 0.0.0 (git+https://github.com/ankit3005/freetype-rs)",
  "geom 0.1.0 (git+https://github.com/servo/rust-geom)",
  "harfbuzz 0.1.0 (git+https://github.com/servo/rust-harfbuzz)",
- "image 0.1.0 (git+https://github.com/PistonDevelopers/image)",
  "layers 0.1.0 (git+https://github.com/servo/rust-layers)",
  "msg 0.0.1",
  "net 0.0.1",
@@ -472,6 +471,7 @@ version = "0.0.1"
 dependencies = [
  "geom 0.1.0 (git+https://github.com/servo/rust-geom)",
  "http 0.1.0-pre (git+https://github.com/servo/rust-http?ref=servo)",
+ "image 0.1.0 (git+https://github.com/PistonDevelopers/image)",
  "png 0.1.0 (git+https://github.com/servo/rust-png)",
  "stb_image 0.1.0 (git+https://github.com/servo/rust-stb-image)",
  "url 0.1.0 (git+https://github.com/servo/rust-url)",
